@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+model User {
+  id String @id @default(cuid())
+  name String
+  phone String @unique
+  email String @unique
+  nin_encrypted String
+  password_hash String
+  account_number String?
+  bank_code String?
+  is_verified Boolean @default(false)
+  verification_paid Boolean @default(false)
+  createdAt DateTime @default(now())
+  orders Order[]
+}
+model Product {
+  id String @id @default(cuid())
+  name String
+  category String
+  price Float
+  image String
+  stock Int
+}
+model Order {
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  productId String
+  total_price Float
+  verification_fee Float
+  monthly_payment Float
+  months_remaining Int
+  status String @default("pending_kyc")
+  createdAt DateTime @default(now())
+  payments Payment[]
+}
+model Payment {
+  id String @id @default(cuid())
+  orderId String
+  order Order @relation(fields: [orderId], references: [id])
+  amount Float
+  type String
+  status String
+  paystack_ref String?
+  createdAt DateTime @default(now())
+}
